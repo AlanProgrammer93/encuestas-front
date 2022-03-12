@@ -4,7 +4,8 @@ import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 import Form from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
-import { Card } from 'react-bootstrap'
+import { Card, Spinner } from 'react-bootstrap'
+import { registerUser } from '../services/UserService'
 
 const Register = () => {
 
@@ -12,9 +13,18 @@ const Register = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [errors, setErrors] = useState<any>({});
+    const [sendingData, setSendingData] = useState(false);
 
-    const login = () => {
-        console.log(name, email, password);
+    const register = async (e: React.SyntheticEvent) => {
+        e.preventDefault();
+        try {
+            setSendingData(true);
+            await registerUser(name, email, password);
+            setSendingData(false);
+        } catch(errors: any) {
+            setErrors(errors.response.data.errors);
+            setSendingData(false);
+        }
         
     }
 
@@ -25,24 +35,68 @@ const Register = () => {
                 <Card className='mt-5'>
                     <Card.Body>
                         <h4>Crear Cuenta</h4><hr />
+                        <Form onSubmit={register}>
+                            <Form.Group className='mb-3' controlId='name'>
+                                <Form.Label>Nombre</Form.Label>
+                                <Form.Control 
+                                    isInvalid={!!errors?.name}
+                                    value={name}
+                                    onChange={e => setName(e.target.value)}
+                                    type='text' 
+                                    placeholder='e.g John Doe'
+                                ></Form.Control>
+                                <Form.Control.Feedback type='invalid'>
+                                    { errors?.name }
+                                </Form.Control.Feedback>
+                            </Form.Group>
 
-                        <Form.Group className='mb-3' controlId='name'>
-                            <Form.Label>Nombre</Form.Label>
-                            <Form.Control type='text' placeholder='e.g John Doe'></Form.Control>
-                        </Form.Group>
+                            <Form.Group className='mb-3' controlId='email'>
+                                <Form.Label>Correo Electronico</Form.Label>
+                                <Form.Control 
+                                    isInvalid={!!errors?.email}
+                                    value={email}
+                                    onChange={e => setEmail(e.target.value)}
+                                    type='email' 
+                                    placeholder='e.g JohnDoe@gmail.com'
+                                ></Form.Control>
+                                <Form.Control.Feedback type='invalid'>
+                                    { errors?.email }
+                                </Form.Control.Feedback>
+                            </Form.Group>
 
-                        <Form.Group className='mb-3' controlId='name'>
-                            <Form.Label>Correo Electronico</Form.Label>
-                            <Form.Control type='email' placeholder='e.g JohnDoe@gmail.com'></Form.Control>
-                        </Form.Group>
+                            <Form.Group className='mb-3' controlId='password'>
+                                <Form.Label>Contraseña</Form.Label>
+                                <Form.Control 
+                                    isInvalid={!!errors?.password}
+                                    value={password}
+                                    onChange={e => setPassword(e.target.value)}
+                                    type='password' 
+                                    placeholder='********'
+                                ></Form.Control>
+                                <Form.Control.Feedback type='invalid'>
+                                    { errors?.password }
+                                </Form.Control.Feedback>
+                            </Form.Group>
 
-                        <Form.Group className='mb-3' controlId='name'>
-                            <Form.Label>Contraseña</Form.Label>
-                            <Form.Control type='password' placeholder='********'></Form.Control>
-                        </Form.Group>
-
-                        <Button onClick={login}>Crear Cuenta</Button>
-
+                            <Button type='submit'>
+                                {
+                                    sendingData ? 
+                                                    <>
+                                                        <Spinner 
+                                                            animation='border' 
+                                                            as="span" 
+                                                            size='sm'
+                                                            role="status"
+                                                            aria-hidden="true"
+                                                        ></Spinner>&nbsp;
+                                                        <span>
+                                                            Creando Usuario...
+                                                        </span>
+                                                    </>
+                                                : "Crear Cuenta"
+                                }
+                            </Button>
+                        </Form>
                     </Card.Body>
                 </Card>
             </Col>
